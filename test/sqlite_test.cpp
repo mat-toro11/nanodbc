@@ -544,3 +544,13 @@ TEST_CASE_METHOD(sqlite_fixture, "test_while_next_iteration", "[sqlite][looping]
 {
     test_while_next_iteration();
 }
+
+TEST_CASE_METHOD(sqlite_fixture, "test_string_agg", "[sqlite][string]")
+{
+    test_string_agg();
+}
+
+TEST_CASE_METHOD(sqlite_fixture, "test_group_concat", "[sqlite][string]")
+{
+    test_group_concat();
+}

@@ -2956,6 +2956,49 @@ PRIMARY KEY(t2_fid)
         }
     }
 
+    void test_group_concat()
+    {
+        nanodbc::connection connection = connect();
+        nanodbc::execute(connection, NANODBC_TEXT("CREATE TABLE Group_Concat_Testing (fname varchar(100), chars varchar(500));"));
+
+        {
+                for(int i = 0; i < 256; i++){
+                        nanodbc::execute(connection,
+                        NANODBC_TEXT("INSERT INTO Group_Concat_Testing(fname, chars) VALUES('Alexander', 'A');"));
+                }
+
+                auto row_count = nanodbc::execute(connection, NANODBC_TEXT("SELECT COUNT(*) AS TOTAL FROM Group_Concat_Testing;"));
+                row_count.next();
+                REQUIRE(row_count.get<int>("TOTAL") > 255);
+        }
+
+        {
+                auto result = nanodbc::execute(connection, "SELECT fname, GROUP_CONCAT (chars) AS aggregate FROM Group_Concat_Testing GROUP BY fname;");
+                result.next();
+                REQUIRE(result.get<std::string>("aggregate").size() > 255);
+        }
+    }
+
+    void test_string_agg() {                                                                                                                 
+        nanodbc::connection connection = connect();                                                                                          
+        nanodbc::execute(connection, NANODBC_TEXT("CREATE TABLE String_Agg_Testing (fname varchar(100), chars varchar(500));"));                                                                                                                                                  
+        {                                                                                                                                            
+            for(int i = 0; i < 256; i++){                                                                                                                
+                nanodbc::execute(connection,                                                                                                         
+                    NANODBC_TEXT("INSERT INTO String_Agg_Testing(fname, chars) VALUES('Alexander', 'A');"));                                     
+            }                                                                                                                                                                                                                                                                         
+            auto row_count = nanodbc::execute(connection, NANODBC_TEXT("SELECT COUNT(*) AS TOTAL FROM String_Agg_Testing;"));                    
+            row_count.next();                                                                                                                    
+            REQUIRE(row_count.get<int>("TOTAL") > 255);                                                                                  
+        }                                                                                                                                                                                                                                                                         
+        {                                                                                                                                            
+            auto result = nanodbc::execute(connection, "SELECT fname, STRING_AGG(chars, ', ') AS aggregate FROM String_Agg_Testing GROUP BY fname;");
+            result.next();
+            REQUIRE(result.get<std::string>("aggregate").size() > 255);
+        }
+    }
+
+
     void test_std_optional()
     {
 #ifdef NANODBC_HAS_STD_OPTIONAL
